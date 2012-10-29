@@ -5,112 +5,164 @@
 	  	
 	
 #include<stdio.h>
-
-int main()
+struct bank_algthm
 {
-    int claim[7][5],request[7][5],allocate[7][5],resource[5],available[5],comp[7];
-    int first,p,r,i,j,prc,count,t;
-    count=0;
-    for(i=1;i<=7;i++)
-        comp[i]=0;
+    int alloc[10];
+    int max[10];
+    int need[10];
+    int c;
+}process[10];
 
-    printf("\n BANKERS ALGORITHM \n");
-    printf("Enter the no of processes : "); //reading number of process
-    scanf("%d",&p);
-    printf("\nEnter the no of resources : "); //reading number of resourses
-    scanf("%d",&r);
-    printf("\nEnter the claim for each process : ");
-    for(i=1;i<=p;i++)
+int avail[10];
+int m,n;
+char res[5]={'A','B','C','D','E'};
+int safe[20];
+int grant[10];
+int g=0;
+
+
+void read()
+{
+    printf("\nEnter the number of processes:");
+    scanf("%d",&n);
+    int i,j;
+    printf("\nEnter the number of resorces:");
+    scanf("%d",&m);
+    for(i=0;i<n;i++)
     {
-        printf("\nFor process %d : ",i);
-        for(j=1;j<=r;j++)
+        process[i].c=0;
+        printf("\n\nEnter the details of the process %d:\n",i+1);
+        for(j=0;j<m;j++)
         {
-            scanf("%d",&claim[i][j]);
+            printf("\nEnter the instances of %c allocated:",res[j]);
+            scanf("%d",&process[i].alloc[j]);
         }
+        for(j=0;j<m;j++)
+        {
+            printf("\nEnter the instances of %c maximum:",res[j]);
+            scanf("%d",&process[i].max[j]);
+            p[i].need[j]=process[i].max[j]-process[i].alloc[j];
+        }
+
     }
-    printf("\nEnter the allocation for each process : ");
-    for(i=1;i<=p;i++)
+
+
+    printf("\nEnter the total instances of availailable resources:\n");
+    for(i=0;i<m;i++)
     {
-        printf("\nFor process ",i);
-        for(j=1;j<=r;j++)
-        {
-            scanf("%d",&allocate[i][j]);
-        }
+        printf("%c\t",res[i]);
+        scanf("%d",&avail[i]);
     }
-    printf("\nEnter total no of each resource : ");
-    for(j=1;j<=r;j++)
-        scanf("%d",&resource[j]);
-    for(j=1;j<=r;j++)
+}
+
+
+void display()
+{
+    int i,j;
+    printf(" \t Alloc \t Max \t Need \t avail \n");
+    printf(" \t ");
+    for(j=0;j<4;j++,printf("\t "))
+        for(i=0;i<m;i++)
+            printf("%c",res[j]);
+    printf("\n");
+    for(i=0;i<n;i++)
     {
-        int total=0;
-        avail[j]=0;
-        for(i=1;i<=p;i++)
+        printf("P%d\t",i);
+        for(j=0;j<m;j++)
+            printf("%d",process[i].alloc[j]);
+        printf("\t");
+        for(j=0;j<m;j++)
+            printf("%d",process[i].max[j]);
+        printf("\t");
+        for(j=0;j<m;j++)
+            printf("%d",process[i].need[j]);
+        printf("\t");
+        if(i==0)
         {
-	total+=allocate[i][j];
-	}
-        available[j]=resource[j]-total;
+            for(j=0;j<m;j++)
+                printf("%d\t",avail[j]);
+        }
+        printf("\n");
     }
-    do
+}
+
+
+int over()
+{
+    int i,j;
+    for(i=0;i<n;i++)
+        for(j=0;j<m;j++)
+            if(process[i].need[j]!=0)
+                return 1;
+    return 0;
+}
+void bankersalgo()
+{
+    int i,j,k,l;
+    for(i=0,l=0;;i++,l++,i=i%n)
     {
-        for(i=1;i<=p;i++)
+        if(over()==0)
         {
-            for(j=1;j<=r;j++)
-            {
-                request[i][j]=claim[i][j]-allocate[i][j];
-            }
+            printf("\nAll processes complete\n\nNo Deadlock");
+            printf("\n\nSafe state:");
+            for(i=0;i<g;i++)
+                printf("%d",safe[i]);
+            printf(">");
+            break;
         }
-        printf("\n\nAvailable resources are : ");
-        for(j=1;j<=r;j++)
-        { printf(" ",available[j]); }
-        printf("\nClaim matrix:\tAllocation matrix:\n");
-        for(i=1;i<=p;i++)
+        else
         {
-            for(j=1;j<=r;j++)
+            if(p[i].c==0)
             {
-                printf("%d\t",claim[i][j]);
-            }
-            printf("\t\t\t");
-            for(j=1;j<=r;j++)
-            {
-                printf("%d\t",allocate[i][j]);
-            }
-            printf("\n");
-        }
-        prc=0;
-        for(i=1;i<=p;i++)
-        {
-            if(comp[i]==0)
-            {
-                prc=i;
-                for(j=1;j<=r;j++)
-                {
-                    if(available[j])
-                    {
-                        prc=0;
+                for(j=0;j<m;j++)
+                    if(p[i].need[j]>avail[j])
                         break;
+                if(j==m)
+                {
+                    safe[2 1 0 1g]=i;
+                    g++;
+                    p[i].c=1;
+                    for(j=0;j<m;j++)
+                    {
+                        avail[j]=avail[j]-p[i].need[j];
+                        p[i].need[j]=0;
+                        p[i].alloc[j]=p[i].max[j];
                     }
+                    printf("\n\nProcess P%d is executing:\n\n",i);
+                    display();
+                    for(j=0;j<m;j++)
+                    {
+                        avail[j]=avail[j]+p[i].alloc[j];
+                        p[i].alloc[j]=0;
+                        p[i].max[j]=0;
+                    }
+                    printf("\n\nProcess P%d is completed:\n\n",i);
+                    display();
                 }
             }
-            if(prc!=0)
-                break;
         }
-        if(prc!=0)
+        if(l==25)
         {
-            printf("\nProcess ",prc,"runs to completion!");
-            count++;
-            for(j=1;j<=r;j++)
-            {
-                available[j]+=allocate[prc][j];
-                allocate[prc][j]=0;
-                claim[prc][j]=0;
-                comp[prc]=1;
-            }
+            printf("....Deadlock...");
+            break;
         }
     }
-    while(count!=p&&prc!=0);
-    if(count==p)
-        printf("\nThe system is in a safe state!!");
-    else
-        printf("\nThe system is in an unsafe state!!");
-return ;
+}
+
+main()
+{
+    int choice;
+    do
+    {
+        printf("\n\nBANKERS ALGORITHM");
+        printf("\n1.Read data\n2.Display data\n3.Safe sequence\n4.Exit\nEnter you choiceoice--");
+        scanf("%d",&choice);
+        switch(choice)
+        {
+            case 1:read();break;
+            case 2:display();break;
+            case 3:bankersalgo();break;
+            case 4:break;
+        }
+    }while(choice!=4);
 }
