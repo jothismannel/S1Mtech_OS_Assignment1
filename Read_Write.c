@@ -29,7 +29,7 @@ int main()
     	{
 		perror("ERROR");
 	}
-  	if((sem_init(&db,0,1))<0)
+  	if((sem_init(&mutex,0,1))<0)
 	{
 	    perror("ERROR");
 	}
@@ -50,7 +50,7 @@ int main()
       	perror("ERROR");
 	
 	sem_destroy(&mutex);
-	sem_destroy(&db);
+	
 
 }
  
@@ -75,11 +75,7 @@ void *reader(void *n)
  	 if((sem_post(&mutex))<0)
  	   perror("ERROR");
   
-	if(reader_count==0)
-	  {
-	    if((sem_post(&db))<0)
-      		perror("ERROR");
-	  }
+	
 }
 void *writer(void *n)
 {
@@ -89,6 +85,5 @@ void *writer(void *n)
 	  if((sem_wait(&db))<0)
 	    perror("ERROR");
 	  printf("writer %d is writing\n",j);
-	  if((sem_post(&db))<0)
-	    perror("ERROR");
+	 
 }
