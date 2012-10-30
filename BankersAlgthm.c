@@ -41,7 +41,7 @@ void read()
         {
             printf("\nEnter the instances of %c maximum:",res[j]);
             scanf("%d",&process[i].max[j]);
-            p[i].need[j]=process[i].max[j]-process[i].alloc[j];
+            process[i].need[j]=process[i].max[j]-process[i].alloc[j];
         }
 
     }
@@ -112,10 +112,10 @@ void bankersalgo()
         }
         else
         {
-            if(p[i].c==0)
+            if(process[i].c==0)
             {
                 for(j=0;j<m;j++)
-                    if(p[i].need[j]>avail[j])
+                    if(process[i].need[j]>avail[j])
                         break;
                 if(j==m)
                 {
@@ -125,16 +125,16 @@ void bankersalgo()
                     for(j=0;j<m;j++)
                     {
                         avail[j]=avail[j]-p[i].need[j];
-                        p[i].need[j]=0;
-                        p[i].alloc[j]=p[i].max[j];
+                        process[i].need[j]=0;
+                        process[i].alloc[j]=process[i].max[j];
                     }
                     printf("\n\nProcess P%d is executing:\n\n",i);
                     display();
                     for(j=0;j<m;j++)
                     {
-                        avail[j]=avail[j]+p[i].alloc[j];
-                        p[i].alloc[j]=0;
-                        p[i].max[j]=0;
+                        avail[j]=avail[j]+process[i].alloc[j];
+                        process[i].alloc[j]=0;
+                        process[i].max[j]=0;
                     }
                     printf("\n\nProcess P%d is completed:\n\n",i);
                     display();
