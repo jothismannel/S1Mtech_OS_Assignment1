@@ -119,7 +119,7 @@ void bankersalgo()
                         break;
                 if(j==m)
                 {
-                    safe[2 1 0 1g]=i;
+                    safe[2 1 0 1]=i;
                     g++;
                     p[i].c=1;
                     for(j=0;j<m;j++)
