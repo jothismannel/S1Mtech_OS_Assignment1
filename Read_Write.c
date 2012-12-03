@@ -3,87 +3,61 @@
 * created on 18.10.12 */
 
 #include <stdio.h>
-#include <semaphore.h>
 #include <pthread.h>
  
-#define NUM_READ 2
-#define NUM_WRIT 2
+#define MAX 6
+pthread_mutex_t the_mutex;
+pthread_cond_t condc,condp;
+int buffer=0;
  
-sem_t mutex;
-sem_t db;
- 
-int reader_count=0;
-int reader_name[]={1,2};
-int writer_name[]={1,2};
- 
-void *reader(void *i);
-void *writer(void *i);
- 
+
+void *producer(void *ptr)
+{
+	int i;
+	for(i = 1;i <= max; i++)
+	{
+		pthread_mutex_lock(&the_mutex);
+		while(buffer!=0)
+		pthread_cond_wait(&condp,&the_mutex);
+		buffer=i;
+		printf("\n Producer produced")
+		pthread_cond_signal(&condc);
+		pthread_mutex_unlock(&the_mutex);
+	}
+	pthread_exit(0);
+}
+
+void *consumer(void *ptr)
+{
+	int i;
+	for(i = 1;i <= max; i++)
+	{
+		pthread_mutex_lock(&the_mutex);
+		while(buffer==0)
+		pthread_cond_wait(&condc,&the_mutex);
+		buffer=0;
+		printf("\nConsumer consumed")
+		pthread_cond_signal(&condp);
+		pthread_mutex_unlock(&the_mutex);
+	}
+	pthread_exit(0);
+}
+
 int main()
 {
-  	int i,j;
-  	pthread_t readers[NUM_READ];
-  	pthread_t writers[NUM_WRIT];
-  
-	if((sem_init(&mutex,0,1))<0)
-    	{
-		perror("ERROR");
-	}
-  	if((sem_init(&mutex,0,1))<0)
-	{
-	    perror("ERROR");
-	}
+	pthread_t pro,con;
+	pthread_mutex_init(&the_mutex,0);
+	pthread_cond_init(&condc,0);
+	pthread_cond_init(&condp,0);
+	pthread_create(&con,0,consumer,0);
+	pthread_create(&pro,0,producer,0);
+	pthread_join(pro,0);
+	pthread_join(con,0);
+	pthread_cond_destroy(&condc);
+	pthread_cond_destroy(&condp);
+	pthread_mutex_destroy(&the_mutex);
 	
-	for(i=0;i<NUM_READ;i++)
-    	if((pthread_create(&readers[i],NULL,reader,
-				&reader_name[i]))!=0)
-	      perror("ERROR");	
-	  for(j=0;j<NUM_WRIT;j++)
-	   if((pthread_create(&writers[j],NULL,writer,
-		&writer_name[j]))!=0)
-		perror("ERROR");
-	for(i=0;i<NUM_READ;i++)
-	if((pthread_join(readers[i],NULL))!=0)
-		perror("ERROR");
-  	for(j=0;j<NUM_WRIT;j++)
-    	if((pthread_join(writers[j],NULL))!=0)
-      	perror("ERROR");
-	
-	sem_destroy(&mutex);
-	
+}
 
-}
- 
-void *reader(void *n)
-{
-	int i=*(int *)n;
-	if((sem_wait(&mutex))<0)
-	perror("ERROR");
-	reader_count++;
-	
-	if(reader_count==1)
-	    if((sem_wait(&db))<0)	
-		      perror("ERROR");	
-	  if((sem_post(&mutex))<0)
-	    perror("ERROR");
-	  printf("reader %d is reading\n",i);
- 	 sleep(1);
-  	
-	if((sem_wait(&mutex))<0)
-	    perror("ERROR");
-	  reader_count=reader_count-1;
- 	 if((sem_post(&mutex))<0)
- 	   perror("ERROR");
-  
-	
-}
-void *writer(void *n)
-{
-	  int j=*((int *)n);
-	  printf("writer %d is waiting\n",j);
 
-	  if((sem_wait(&db))<0)
-	    perror("ERROR");
-	  printf("writer %d is writing\n",j);
-	 
-}
+
